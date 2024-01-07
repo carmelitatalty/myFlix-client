@@ -1,10 +1,13 @@
 import PropTypes from "prop-types";
+import { MovieShape } from "../../types/movie";
+import Button from "react-bootstrap/Button";
+import Image from 'react-bootstrap/Image';
 
 export const MovieView = ({movie, onBackClick}) => {
     return (
     <div>
         <div>
-            <img src={movie.ImagePath} />
+            <Image src={movie.ImagePath} />
         </div>
         <div>
             <span>Title: </span>
@@ -22,22 +25,12 @@ export const MovieView = ({movie, onBackClick}) => {
             <span>Director: </span>
             <span>{movie.Director.Name}</span>
         </div>
-        <button onClick={onBackClick}>Back</button>
+        <Button onClick={onBackClick}>Back</Button>
     </ div>
     )
 }
 
 MovieView.propTypes = {
-    movie: PropTypes.shape({
-        Title: PropTypes.string.isRequired,
-        ImagePath: PropTypes.string.isRequired,
-        Description: PropTypes.string.isRequired,
-        Director: PropTypes.shape({
-            Name: PropTypes.string.isRequired
-        }).isRequired,
-        Genre: PropTypes.shape({
-            Name: PropTypes.string.isRequired
-        }).isRequired
-    }).isRequired,
+    movie: MovieShape,
     onBackClick: PropTypes.func.isRequired
 }
