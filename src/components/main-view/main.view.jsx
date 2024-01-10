@@ -9,6 +9,7 @@ import { NavigationBar } from "../navigation-bar/navigation-bar"
 import Row from "react-bootstrap/Row";
 import Col from 'react-bootstrap/Col';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ProfileView } from "../profile-view/profile-view";
 
 export const MainView = () => {
     
@@ -18,8 +19,7 @@ export const MainView = () => {
   const [movies, setMovies] = useState([]);
   const [user, setUser] = useState(storedUser ? storedUser : null);
   const [token, setToken] = useState(storedToken ? storedToken : null);
-
-  
+  const [favoriteMovies, setFavoriteMovies] = useState([]);
 
   useEffect(() => {
     if (!token) {
@@ -34,6 +34,16 @@ export const MainView = () => {
             setMovies(data)
         })
   }, [token])
+
+  useEffect(() => {
+    if (!movies || !user || !user.FavoriteMovies) {
+        setFavoriteMovies([])
+        return;
+    }
+
+    let favorites = movies.filter(m => user.FavoriteMovies.includes(m._id))
+    setFavoriteMovies(favorites)
+  }, [movies, user])
 
   const onLoggedOut = () => {
       setUser(null);
@@ -81,14 +91,29 @@ export const MainView = () => {
                         <Col>The list is empty!</Col>
                         ) : (
                         <Col md={8}>
-                            <MovieView  movies={movies} />
+                            <MovieView  movies={movies} user={user} setUser={setUser} token={token} />
                         </Col>
                         )}
                     </>}
                 ></Route>
+                <Route path="/profile" element={
+                    <>
+                        {!user ? (
+                            <Navigate to="/login" replace />
+                        ) : (
+                            <Col md={8}>
+                                <ProfileView user={user} 
+                                    setUser={setUser} 
+                                    favoriteMovies={favoriteMovies} 
+                                    token={token} 
+                                    onLoggedOut={onLoggedOut}></ProfileView>
+                            </Col>
+                        )}
+                    </>
+                }></Route>
                 <Route path="/"
                     element={<>
-                        {!user ? (
+                        {!user || !movies ? (
                         <Navigate to="/login" replace />
                         ) : movies.length === 0 ? (
                         <Col>The list is empty!</Col>
