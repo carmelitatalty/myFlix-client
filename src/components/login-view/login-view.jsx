@@ -15,8 +15,12 @@ export const LoginView = ({onLoggedIn}) => {
           Password: password
         };
     
-        fetch(`https://vast-coast-62638-64c47efe4f99.herokuapp.com/login?Username=${username}&Password=${password}`, {
-          method: "POST"
+        fetch(`https://vast-coast-62638-64c47efe4f99.herokuapp.com/login`, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json"
+          }
         })
         .then(response => response.json())
         .then(data => {
