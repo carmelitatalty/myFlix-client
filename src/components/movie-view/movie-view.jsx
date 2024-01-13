@@ -1,21 +1,31 @@
-import PropTypes from "prop-types";
-import { MovieShape } from "../../types/movie";
 import Button from "react-bootstrap/Button";
 import Image from "react-bootstrap/Image";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 
-export const MovieView = ({ movies, user, setUser, token }) => {
+import { useSelector, useDispatch } from "react-redux";
+
+import { addFavorite, removeFavorite } from "../../redux/reducers/favorite";
+
+
+export const MovieView = () => {
+  const movies = useSelector ((state) => state.movies.list);
+  const user = useSelector((state) => state.user);
+  const token = useSelector((state) => state.token.token);
+  const favoriteMovies = useSelector((state) => state.favorite.favoriteMovies);
+
   const { movieId } = useParams();
   const movie = movies.find((m) => m._id === movieId);
 
-  const [isFavorite, setIsFavorite] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false);
+  
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    setIsFavorite(user.FavoriteMovies.includes(movie._id))
+    setIsFavorite(favoriteMovies.includes(movie._id))
   },
-  [user, user.FavoriteMovies, user.FavoriteMovies.length]);
+  [favoriteMovies, favoriteMovies.length]);
 
   const handleAddFavorite = () => {
     fetch(
@@ -27,8 +37,7 @@ export const MovieView = ({ movies, user, setUser, token }) => {
     )
       .then((response) => response.json())
       .then((data) => {
-        user.FavoriteMovies.push(movie._id);
-        setUser(user)
+        dispatch(addFavorite(movie._id))
       })
       .catch((e) => {
         alert("Error adding favoirte");
@@ -43,18 +52,14 @@ export const MovieView = ({ movies, user, setUser, token }) => {
         headers: { Authorization: `Bearer ${token}` },
       }
     ).then(() => {
-      const index = user.FavoriteMovies.indexOf(movie._id);
-      if (index > -1) {
-        user.FavoriteMovies.splice(index, 1);
-        setUser(user)
-      }
+      dispatch(removeFavorite(movie._id))
     });
   };
 
   return (
     <div>
       <div>
-        <Image src={movie.ImagePath} />
+        <Image src={movie.ImagePath} className="img-fluid" />
       </div>
       <div>
         <span>Title: </span>
@@ -88,8 +93,4 @@ export const MovieView = ({ movies, user, setUser, token }) => {
       </Link>
     </div>
   );
-};
-
-MovieView.propTypes = {
-  movies: PropTypes.arrayOf(MovieShape).isRequired,
 };

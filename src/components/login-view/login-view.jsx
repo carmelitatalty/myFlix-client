@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import { useDispatch } from "react-redux"
+import { setUser } from "../../redux/reducers/user";
+import { setToken } from '../../redux/reducers/token';
+import { setFavorites } from '../../redux/reducers/favorite';
 
-export const LoginView = ({onLoggedIn}) => {
+export const LoginView = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    const dispatch = useDispatch();
 
     const handleSubmit = (event) => {
         // this prevents the default behavior of the form which is to reload the entire page
@@ -27,7 +33,9 @@ export const LoginView = ({onLoggedIn}) => {
             if (data.user) {
                 localStorage.setItem('user', JSON.stringify(data.user))
                 localStorage.setItem('token', data.token)
-                onLoggedIn(data.user, data.token)
+                dispatch(setUser(data.user))
+                dispatch(setToken(data.token))
+                dispatch(setFavorites(data.user.FavoriteMovies?data.user.FavoriteMovies : []))
             } else {
                 alert('No such user.')
             }
