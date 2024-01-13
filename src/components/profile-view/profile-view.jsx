@@ -6,14 +6,19 @@ import Form from "react-bootstrap/Form";
 
 import { MovieCard } from "../movie-card/movie-card";
 import { redirect } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 
-export const ProfileView = ({
-  user,
-  setUser,
-  favoriteMovies,
-  token,
-  onLoggedOut,
-}) => {
+import { setUser } from "../../redux/reducers/user";
+import { setFavorites } from "../../redux/reducers/favorite";
+import { useEffect } from 'react';
+import { setFavorites } from "../../redux/reducers/favorite";
+
+export const ProfileView = () => {
+  const movies = useSelector((state) => state.movies.list);
+  const user = useSelector((state) => state.user);
+  const token = useSelector((state) => state.token.token);
+  const favoriteMovies = useSelector((state) => state.favorite.favoriteMovies);
+
   const birthdate = new Date(user.Birthday);
   const [username, setUsername] = useState(user.Username);
   const [password, setPassword] = useState("");
@@ -21,6 +26,9 @@ export const ProfileView = ({
   const [birthday, setBirthday] = useState(
     birthdate.toISOString().split("T")[0]
   );
+  const [faveMovies, setFaveMovies] = useState([]);
+
+  const dispatch = useDispatch();
 
   const handleUpdateUser = (event) => {
     event.preventDefault();
@@ -46,7 +54,7 @@ export const ProfileView = ({
         user.Username = username;
         user.Email = email;
         user.Birthday = new Date(birthdate).toISOString();
-        setUser(user);
+        dispatch(setUser(user));
 
         alert("Update successful");
         window.location.reload();
@@ -70,13 +78,25 @@ export const ProfileView = ({
     ).then((response) => {
       if (response.ok) {
         alert("Deregistration successful");
-        onLoggedOut();
+        dispatch(setUser(null));
+        dispatch(setToken(null));
+        dispatch(setFavorites([]))
         redirect("/");
       } else {
         alert("Deregistration failed");
       }
     });
   };
+
+  useEffect(() => {
+    if (!movies || !favoriteMovies) {
+      setFaveMovies([]);
+      return;
+    }
+
+    let favorites = movies.filter((m) => favoriteMovies.includes(m._id));
+    setFaveMovies(favorites);
+  }, [favoriteMovies, movies]);
 
   return (
     <>
@@ -123,7 +143,7 @@ export const ProfileView = ({
         </Button>
       </Form>
       <>
-        {favoriteMovies.map((movie) => (
+        {faveMovies.map((movie) => (
           <Col key={movie._id} className="mb-5" md={3}>
             <MovieCard movie={movie} />
           </Col>
